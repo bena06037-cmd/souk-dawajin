@@ -23,17 +23,30 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
-  // مراقبة حالة تسجيل الدخول
+  // ✅ الإصلاح الرئيسي: مراقبة حالة تسجيل الدخول بشكل صحيح
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      window.currentUser = { name: user.displayName || user.email.split('@')[0], phone: user.email, uid: user.uid };
+      // المستخدم مسجل دخوله
+      window.currentUser = { 
+        name: user.displayName || user.email.split('@')[0], 
+        phone: user.email, 
+        uid: user.uid 
+      };
     } else {
+      // المستخدم غير مسجل
       window.currentUser = null;
     }
-    if (typeof updateUserUI === 'function') updateUserUI();
+    // ✅ استدعاء updateUserUI فقط بعد أن يتحقق Firebase من الحالة
+    if (typeof updateUserUI === 'function') {
+      updateUserUI();
+    }
+    // ✅ إذا كان المستخدم في صفحة النشر، تحديث العرض
+    const pgPost = document.getElementById('pg-post');
+    if (pgPost && pgPost.classList.contains('on')) {
+      updateUserUI();
+    }
   });
 
-  // تسجيل دخول
   window.firebaseLogin = async function(email, password) {
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -49,11 +62,11 @@
     }
   };
 
-  // إنشاء حساب
   window.firebaseRegister = async function(name, email, password) {
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(cred.user, { displayName: name });
+      // ✅ تحديث currentUser مباشرة بعد التسجيل
       window.currentUser = { name, phone: email, uid: cred.user.uid };
       return { success: true };
     } catch (e) {
@@ -66,9 +79,9 @@
     }
   };
 
-  // تسجيل الخروج
   window.firebaseLogout = async function() {
     await signOut(auth);
+    window.currentUser = null;
   };
 </script>
 <style>
@@ -77,10 +90,8 @@ html,body{font-family:'Tajawal',sans-serif;background:#f0f0f5;min-height:100vh;}
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-thumb{background:#2e7d32;border-radius:4px;}
 
-/* ===== WRAPPER ===== */
 #app{max-width:480px;margin:0 auto;min-height:100vh;background:#f7f7fc;position:relative;padding-bottom:80px;box-shadow:0 0 40px rgba(0,0,0,0.12);}
 
-/* ===== TOP BAR ===== */
 .topbar{
   background:#fff;
   padding:12px 14px 10px;
@@ -108,7 +119,6 @@ html,body{font-family:'Tajawal',sans-serif;background:#f0f0f5;min-height:100vh;}
   display:flex;align-items:center;gap:5px;
 }
 
-/* ===== SEARCH ===== */
 .search-wrap{
   padding:10px 12px 8px;
   background:#fff;
@@ -134,7 +144,6 @@ html,body{font-family:'Tajawal',sans-serif;background:#f0f0f5;min-height:100vh;}
   white-space:nowrap;
 }
 
-/* ===== CATEGORIES ===== */
 .cat-row{
   display:flex;gap:8px;padding:10px 12px;
   overflow-x:auto;scrollbar-width:none;
@@ -156,7 +165,6 @@ html,body{font-family:'Tajawal',sans-serif;background:#f0f0f5;min-height:100vh;}
   box-shadow:0 4px 12px rgba(21,101,192,0.3);
 }
 
-/* ===== HERO ===== */
 .hero{
   margin:12px;border-radius:20px;overflow:hidden;
   background:linear-gradient(135deg,#1b5e20 0%,#2e7d32 40%,#43a047 100%);
@@ -178,7 +186,6 @@ html,body{font-family:'Tajawal',sans-serif;background:#f0f0f5;min-height:100vh;}
 .hero-txt p{color:rgba(255,255,255,.8);font-size:12px;}
 .hero-img{font-size:68px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.25));flex-shrink:0;}
 
-/* ===== STATS ===== */
 .stats{
   display:grid;grid-template-columns:1fr 1fr 1fr;
   margin:0 12px;background:#fff;border-radius:16px;
@@ -189,7 +196,6 @@ html,body{font-family:'Tajawal',sans-serif;background:#f0f0f5;min-height:100vh;}
 .stat .n{font-size:22px;font-weight:900;color:#2e7d32;}
 .stat .l{font-size:11px;color:#aaa;margin-top:2px;}
 
-/* ===== SECTION HEAD ===== */
 .sec-head{
   display:flex;align-items:center;justify-content:space-between;
   padding:14px 14px 6px;
@@ -197,13 +203,11 @@ html,body{font-family:'Tajawal',sans-serif;background:#f0f0f5;min-height:100vh;}
 .sec-head .title{font-size:16px;font-weight:900;color:#222;}
 .sec-head .count{font-size:12px;color:#aaa;font-weight:500;}
 
-/* ===== GRID ===== */
 .grid{
   display:grid;grid-template-columns:1fr 1fr;
   gap:10px;padding:4px 12px 8px;
 }
 
-/* ===== CARD ===== */
 .card{
   background:#fff;border-radius:18px;overflow:hidden;
   box-shadow:0 2px 10px rgba(0,0,0,.07);
@@ -254,7 +258,6 @@ html,body{font-family:'Tajawal',sans-serif;background:#f0f0f5;min-height:100vh;}
   display:flex;align-items:center;justify-content:center;gap:4px;
 }
 
-/* ===== FLOATING POST BTN ===== */
 .float-btn{
   position:fixed;bottom:82px;left:50%;transform:translateX(-50%);
   background:linear-gradient(135deg,#1565c0,#1e88e5);
@@ -268,7 +271,6 @@ html,body{font-family:'Tajawal',sans-serif;background:#f0f0f5;min-height:100vh;}
 }
 @keyframes pulse{0%,100%{box-shadow:0 6px 22px rgba(21,101,192,0.45);}50%{box-shadow:0 6px 32px rgba(21,101,192,0.65);}}
 
-/* ===== BOTTOM NAV ===== */
 .bottom-nav{
   position:fixed;bottom:0;left:50%;transform:translateX(-50%);
   width:100%;max-width:480px;
@@ -293,7 +295,6 @@ html,body{font-family:'Tajawal',sans-serif;background:#f0f0f5;min-height:100vh;}
   box-shadow:0 4px 14px rgba(21,101,192,0.4);
 }
 
-/* ===== OVERLAY / MODAL ===== */
 .overlay{
   position:fixed;inset:0;background:rgba(0,0,0,.55);
   z-index:100;display:flex;align-items:flex-end;justify-content:center;
@@ -306,7 +307,6 @@ html,body{font-family:'Tajawal',sans-serif;background:#f0f0f5;min-height:100vh;}
 .sheet-handle{width:40px;height:4px;background:#ddd;border-radius:4px;margin:0 auto 16px;}
 .sheet-title{font-size:18px;font-weight:900;color:#222;text-align:center;margin-bottom:20px;}
 
-/* ===== DETAIL SHEET ===== */
 .detail-img-big{
   width:100%;height:200px;
   background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
@@ -336,7 +336,6 @@ html,body{font-family:'Tajawal',sans-serif;background:#f0f0f5;min-height:100vh;}
   margin-top:8px;
 }
 
-/* ===== FORM ===== */
 .form-group{margin-bottom:14px;}
 .form-label{display:block;font-size:13px;font-weight:700;color:#555;margin-bottom:7px;}
 .form-input{
@@ -361,7 +360,6 @@ select.form-input{appearance:none;}
   font-family:'Tajawal',sans-serif;width:100%;margin-top:6px;
 }
 
-/* ===== AUTH TABS ===== */
 .auth-tabs{display:flex;background:#f5f5f5;border-radius:12px;padding:4px;margin-bottom:18px;}
 .a-tab{
   flex:1;padding:10px;text-align:center;
@@ -371,7 +369,6 @@ select.form-input{appearance:none;}
 }
 .a-tab.on{background:#fff;color:#1565c0;box-shadow:0 2px 8px rgba(0,0,0,.1);}
 
-/* ===== UPLOAD ===== */
 .upload-area{
   border:2px dashed #c8e6c9;border-radius:14px;
   padding:24px;text-align:center;cursor:pointer;
@@ -381,7 +378,6 @@ select.form-input{appearance:none;}
 .upload-area:hover{border-color:#2e7d32;}
 .upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer;}
 
-/* ===== PROFILE MENU ===== */
 .p-avatar{
   width:76px;height:76px;
   background:linear-gradient(135deg,#1b5e20,#43a047);
@@ -399,7 +395,6 @@ select.form-input{appearance:none;}
   font-size:10px;font-weight:800;
 }
 
-/* ===== TOAST ===== */
 .toast{
   position:fixed;top:70px;left:50%;transform:translateX(-50%);
   z-index:999;padding:12px 22px;border-radius:14px;
@@ -410,26 +405,40 @@ select.form-input{appearance:none;}
 .t-ok{background:linear-gradient(135deg,#1b5e20,#43a047);color:#fff;}
 .t-err{background:linear-gradient(135deg,#b71c1c,#e53935);color:#fff;}
 
-/* ===== EMPTY ===== */
 .empty{text-align:center;padding:70px 20px;color:#ccc;}
 .empty .ei{font-size:60px;margin-bottom:12px;}
 .empty .et{font-size:16px;font-weight:700;color:#bbb;}
 
-/* ===== PAGES ===== */
 .page{display:none;}
 .page.on{display:block;}
+
+/* ✅ شاشة تحميل Firebase */
+#auth-loading {
+  position:fixed;inset:0;background:rgba(255,255,255,0.85);
+  display:flex;align-items:center;justify-content:center;
+  z-index:200;flex-direction:column;gap:12px;
+}
+#auth-loading .spinner {
+  width:40px;height:40px;border:4px solid #c8e6c9;
+  border-top-color:#2e7d32;border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
 <div id="app">
 
-<!-- TOAST -->
+<!-- ✅ شاشة تحميل أثناء تحقق Firebase -->
+<div id="auth-loading">
+  <div class="spinner"></div>
+  <div style="font-family:'Tajawal',sans-serif;font-size:14px;color:#2e7d32;font-weight:700;">جاري التحقق...</div>
+</div>
+
 <div id="toast" class="toast" style="display:none"></div>
 
-<!-- ============ HOME PAGE ============ -->
+<!-- HOME PAGE -->
 <div id="pg-home" class="page on">
-
-  <!-- TOPBAR -->
   <div class="topbar">
     <button class="btn-post-top" onclick="requireAuth('post')">✨ أنشر إعلانك</button>
     <div class="topbar-brand">
@@ -438,8 +447,6 @@ select.form-input{appearance:none;}
     </div>
     <div class="topbar-logo">🐔</div>
   </div>
-
-  <!-- SEARCH -->
   <div class="search-wrap">
     <div class="search-box">
       <span class="ico">🔍</span>
@@ -447,11 +454,7 @@ select.form-input{appearance:none;}
     </div>
     <button class="filter-btn" onclick="setCat('all')">🔄 الكل</button>
   </div>
-
-  <!-- CATS -->
   <div class="cat-row" id="cat-row"></div>
-
-  <!-- HERO -->
   <div class="hero" style="margin-top:10px;">
     <div class="hero-txt">
       <div class="badge">✨ مرحباً بكم</div>
@@ -460,32 +463,23 @@ select.form-input{appearance:none;}
     </div>
     <div class="hero-img">🐓</div>
   </div>
-
-  <!-- STATS -->
   <div class="stats" style="margin-top:10px;" id="stats-row">
-    <div class="stat"><div class="n" id="s1">6</div><div class="l">إعلان نشط</div></div>
+    <div class="stat"><div class="n" id="s1">0</div><div class="l">إعلان نشط</div></div>
     <div class="stat"><div class="n">58</div><div class="l">ولاية</div></div>
     <div class="stat"><div class="n" id="s3">0</div><div class="l">بائع مسجل</div></div>
   </div>
-
-  <!-- SECTION HEADER -->
   <div class="sec-head" style="margin-top:10px;">
     <div class="title">📢 الإعلانات</div>
     <div class="count" id="count-lbl"></div>
   </div>
-
-  <!-- GRID -->
   <div class="grid" id="cards-grid"></div>
-
-  <!-- EMPTY -->
   <div id="empty-state" class="empty" style="display:none">
     <div class="ei">🐔</div>
     <div class="et">لا توجد إعلانات</div>
   </div>
+</div>
 
-</div><!-- end home -->
-
-<!-- ============ FAVS PAGE ============ -->
+<!-- FAVS PAGE -->
 <div id="pg-favs" class="page">
   <div class="topbar">
     <div></div>
@@ -500,7 +494,7 @@ select.form-input{appearance:none;}
   </div>
 </div>
 
-<!-- ============ SEARCH PAGE ============ -->
+<!-- SEARCH PAGE -->
 <div id="pg-search" class="page">
   <div class="topbar">
     <div></div>
@@ -517,12 +511,17 @@ select.form-input{appearance:none;}
   <div class="grid" id="search-grid" style="margin-top:8px;"></div>
 </div>
 
-<!-- ============ POST PAGE ============ -->
+<!-- POST PAGE -->
 <div id="pg-post" class="page">
   <div class="topbar">
-    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;font-size:22px;color:#fff;">←</button>
+    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;font-size:22px;color:#333;">←</button>
     <div class="topbar-brand"><div class="name">📢 نشر إعلان</div></div>
     <div></div>
+  </div>
+  <!-- ✅ شاشة انتظار تحقق Firebase في صفحة النشر -->
+  <div id="post-checking" style="text-align:center;padding:80px 24px;">
+    <div style="font-size:40px;margin-bottom:14px;">🔄</div>
+    <div style="font-size:15px;color:#888;">جاري التحقق من حسابك...</div>
   </div>
   <div id="post-locked" style="text-align:center;padding:80px 24px;display:none;">
     <div style="font-size:56px;margin-bottom:14px;">🔒</div>
@@ -561,63 +560,25 @@ select.form-input{appearance:none;}
         <label class="form-label">📍 الولاية *</label>
         <select class="form-input" id="ad-wilaya">
           <option value="">-- اختر الولاية --</option>
-          <option>01 - أدرار</option>
-          <option>02 - الشلف</option>
-          <option>03 - الأغواط</option>
-          <option>04 - أم البواقي</option>
-          <option>05 - باتنة</option>
-          <option>06 - بجاية</option>
-          <option>07 - بسكرة</option>
-          <option>08 - بشار</option>
-          <option>09 - البليدة</option>
-          <option>10 - البويرة</option>
-          <option>11 - تمنراست</option>
-          <option>12 - تبسة</option>
-          <option>13 - تلمسان</option>
-          <option>14 - تيارت</option>
-          <option>15 - تيزي وزو</option>
-          <option>16 - الجزائر</option>
-          <option>17 - الجلفة</option>
-          <option>18 - جيجل</option>
-          <option>19 - سطيف</option>
-          <option>20 - سعيدة</option>
-          <option>21 - سكيكدة</option>
-          <option>22 - سيدي بلعباس</option>
-          <option>23 - عنابة</option>
-          <option>24 - قالمة</option>
-          <option>25 - قسنطينة</option>
-          <option>26 - المدية</option>
-          <option>27 - مستغانم</option>
-          <option>28 - المسيلة</option>
-          <option>29 - معسكر</option>
-          <option>30 - ورقلة</option>
-          <option>31 - وهران</option>
-          <option>32 - البيض</option>
-          <option>33 - إليزي</option>
-          <option>34 - برج بوعريريج</option>
-          <option>35 - بومرداس</option>
-          <option>36 - الطارف</option>
-          <option>37 - تندوف</option>
-          <option>38 - تسمسيلت</option>
-          <option>39 - الوادي</option>
-          <option>40 - خنشلة</option>
-          <option>41 - سوق أهراس</option>
-          <option>42 - تيبازة</option>
-          <option>43 - ميلة</option>
-          <option>44 - عين الدفلى</option>
-          <option>45 - النعامة</option>
-          <option>46 - عين تيموشنت</option>
-          <option>47 - غرداية</option>
-          <option>48 - رليزان</option>
-          <option>49 - تيميمون</option>
-          <option>50 - برج باجي مختار</option>
-          <option>51 - أولاد جلال</option>
-          <option>52 - بني عباس</option>
-          <option>53 - عين صالح</option>
-          <option>54 - عين قزام</option>
-          <option>55 - توقرت</option>
-          <option>56 - جانت</option>
-          <option>57 - المغير</option>
+          <option>01 - أدرار</option><option>02 - الشلف</option><option>03 - الأغواط</option>
+          <option>04 - أم البواقي</option><option>05 - باتنة</option><option>06 - بجاية</option>
+          <option>07 - بسكرة</option><option>08 - بشار</option><option>09 - البليدة</option>
+          <option>10 - البويرة</option><option>11 - تمنراست</option><option>12 - تبسة</option>
+          <option>13 - تلمسان</option><option>14 - تيارت</option><option>15 - تيزي وزو</option>
+          <option>16 - الجزائر</option><option>17 - الجلفة</option><option>18 - جيجل</option>
+          <option>19 - سطيف</option><option>20 - سعيدة</option><option>21 - سكيكدة</option>
+          <option>22 - سيدي بلعباس</option><option>23 - عنابة</option><option>24 - قالمة</option>
+          <option>25 - قسنطينة</option><option>26 - المدية</option><option>27 - مستغانم</option>
+          <option>28 - المسيلة</option><option>29 - معسكر</option><option>30 - ورقلة</option>
+          <option>31 - وهران</option><option>32 - البيض</option><option>33 - إليزي</option>
+          <option>34 - برج بوعريريج</option><option>35 - بومرداس</option><option>36 - الطارف</option>
+          <option>37 - تندوف</option><option>38 - تسمسيلت</option><option>39 - الوادي</option>
+          <option>40 - خنشلة</option><option>41 - سوق أهراس</option><option>42 - تيبازة</option>
+          <option>43 - ميلة</option><option>44 - عين الدفلى</option><option>45 - النعامة</option>
+          <option>46 - عين تيموشنت</option><option>47 - غرداية</option><option>48 - رليزان</option>
+          <option>49 - تيميمون</option><option>50 - برج باجي مختار</option><option>51 - أولاد جلال</option>
+          <option>52 - بني عباس</option><option>53 - عين صالح</option><option>54 - عين قزام</option>
+          <option>55 - توقرت</option><option>56 - جانت</option><option>57 - المغير</option>
           <option>58 - المنيعة</option>
         </select>
       </div>
@@ -646,7 +607,7 @@ select.form-input{appearance:none;}
   </div>
 </div>
 
-<!-- ============ BOTTOM NAV ============ -->
+<!-- BOTTOM NAV -->
 <div class="bottom-nav">
   <button class="btab" id="tab-home" onclick="switchTab('home')">
     <span class="ico">🏠</span><span class="lbl on" id="lbl-home">الرئيسية</span>
@@ -665,10 +626,7 @@ select.form-input{appearance:none;}
   </button>
 </div>
 
-<!-- FLOAT BTN -->
 <button class="float-btn" id="float-btn" onclick="requireAuth('post')">✨ أنشر إعلانك مجاناً</button>
-
-<!-- ============ SHEETS ============ -->
 
 <!-- DETAIL SHEET -->
 <div id="sheet-detail" class="overlay" style="display:none;" onclick="closeSheetIf(event,'sheet-detail')">
@@ -723,10 +681,9 @@ select.form-input{appearance:none;}
   <div class="sheet" id="profile-content"></div>
 </div>
 
-</div><!-- end app -->
+</div>
 
 <script>
-// ===== DATA =====
 const CATS = [
   {id:"all",label:"✨ الكل",icon:"🏪"},
   {id:"broiler",label:"لاحم",icon:"🐔"},
@@ -740,17 +697,17 @@ const CATS = [
 ];
 
 let listings = [];
-
 let favs = [];
 let currentCat = "all";
 let currentUser = null;
 let imgBase64 = null;
 
-// ===== ICONS =====
+// ✅ متغير يتتبع إذا كان Firebase أكمل التحقق
+let authReady = false;
+
 function catIcon(id){const c=CATS.find(x=>x.id===id);return c?c.icon:"📦";}
 function catLabel(id){const c=CATS.find(x=>x.id===id);return c?c.label:id;}
 
-// ===== TOAST =====
 function toast(msg,type){
   const el=document.getElementById('toast');
   el.textContent=msg;
@@ -759,7 +716,6 @@ function toast(msg,type){
   setTimeout(()=>el.style.display='none',2800);
 }
 
-// ===== RENDER CATEGORIES =====
 function renderCats(){
   ['cat-row','cat-row2'].forEach(id=>{
     const row=document.getElementById(id);
@@ -777,7 +733,6 @@ function setCat(id){
   renderSearch();
 }
 
-// ===== RENDER CARD HTML =====
 function cardHTML(l){
   const isFav=favs.includes(l.id);
   const img=l.image
@@ -807,7 +762,6 @@ function cardHTML(l){
     </div>`;
 }
 
-// ===== RENDER CARDS =====
 function renderCards(){
   const q=(document.getElementById('search-inp').value||'').trim();
   const filtered=listings.filter(l=>{
@@ -841,20 +795,17 @@ function renderFavs(){
   else{empty.style.display='none';grid.innerHTML=fl.map(cardHTML).join('');}
 }
 
-// ===== FAV =====
 function toggleFav(id,e){
   e.stopPropagation();
   favs=favs.includes(id)?favs.filter(x=>x!==id):[...favs,id];
   renderCards();renderFavs();renderSearch();
 }
 
-// ===== CALL =====
 function callNow(phone,e){
   if(e)e.stopPropagation();
   window.location.href='tel:'+phone;
 }
 
-// ===== DETAIL =====
 function showDetail(id){
   const l=listings.find(x=>x.id===id);
   if(!l)return;
@@ -884,7 +835,6 @@ function showDetail(id){
   document.getElementById('sheet-detail').style.display='flex';
 }
 
-// ===== SHEETS =====
 function showSheet(name){
   if(name==='profile') renderProfile();
   document.getElementById('sheet-'+name).style.display='flex';
@@ -892,13 +842,13 @@ function showSheet(name){
 function closeSheet(id){document.getElementById(id).style.display='none';}
 function closeSheetIf(e,id){if(e.target.id===id)closeSheet(id);}
 
-// ===== AUTH =====
 function switchAuthTab(tab){
   document.getElementById('auth-login').style.display=tab==='login'?'block':'none';
   document.getElementById('auth-reg').style.display=tab==='reg'?'block':'none';
   document.getElementById('atab-login').className='a-tab'+(tab==='login'?' on':'');
   document.getElementById('atab-reg').className='a-tab'+(tab==='reg'?' on':'');
 }
+
 async function doLogin(){
   const ph=document.getElementById('l-phone').value.trim();
   const pw=document.getElementById('l-pass').value.trim();
@@ -912,11 +862,13 @@ async function doLogin(){
   if(res.success){
     closeSheet('sheet-auth');
     toast('مرحباً بك في سوق الدواجن! 🐔');
+    // ✅ onAuthStateChanged سيتولى تحديث currentUser و updateUserUI
   } else {
     errEl.textContent=res.msg;
     errEl.style.display='block';
   }
 }
+
 async function doRegister(){
   const n=document.getElementById('r-name').value.trim();
   const ph=document.getElementById('r-phone').value.trim();
@@ -929,6 +881,7 @@ async function doRegister(){
   const res=await window.firebaseRegister(n,ph,pw);
   btn.textContent='إنشاء الحساب'; btn.disabled=false;
   if(res.success){
+    // ✅ currentUser تم تحديثه داخل firebaseRegister مباشرة
     updateUserUI();
     closeSheet('sheet-auth');
     toast('تم إنشاء حسابك بنجاح! 🎉');
@@ -937,24 +890,60 @@ async function doRegister(){
     errEl.style.display='block';
   }
 }
+
+// ✅ updateUserUI المُصلحة: تخفي شاشة الانتظار وتعرض المحتوى الصحيح
 function updateUserUI(){
-  document.getElementById('s3').textContent=currentUser?1:0;
-  const postLocked=document.getElementById('post-locked');
-  const postForm=document.getElementById('post-form');
-  if(postLocked&&postForm){
-    postLocked.style.display=currentUser?'none':'block';
-    postForm.style.display=currentUser?'block':'none';
-    if(currentUser) document.getElementById('ad-phone').placeholder=currentUser.phone;
+  // إخفاء شاشة التحميل الرئيسية بعد أول استدعاء
+  const loadingScreen = document.getElementById('auth-loading');
+  if(loadingScreen) loadingScreen.style.display = 'none';
+
+  document.getElementById('s3').textContent = currentUser ? 1 : 0;
+
+  const postChecking = document.getElementById('post-checking');
+  const postLocked = document.getElementById('post-locked');
+  const postForm = document.getElementById('post-form');
+
+  if(postChecking) postChecking.style.display = 'none';
+
+  if(postLocked && postForm){
+    if(currentUser){
+      postLocked.style.display = 'none';
+      postForm.style.display = 'block';
+      // ✅ تعبئة رقم الهاتف تلقائياً
+      const phoneField = document.getElementById('ad-phone');
+      if(phoneField && !phoneField.value){
+        phoneField.placeholder = currentUser.phone;
+      }
+    } else {
+      postLocked.style.display = 'block';
+      postForm.style.display = 'none';
+    }
   }
 }
 
-// ===== REQUIRE AUTH =====
 function requireAuth(action){
+  if(!authReady){
+    // Firebase لم يكتمل بعد، انتظر قليلاً
+    setTimeout(()=>requireAuth(action), 300);
+    return;
+  }
   if(!currentUser){showSheet('auth');return;}
   if(action==='post') switchTab('post');
 }
 
-// ===== POST AD =====
+// ✅ تحديث authReady عند اكتمال Firebase
+const _origUpdateUserUI = updateUserUI;
+window.addEventListener('firebase-auth-ready', ()=>{
+  authReady = true;
+  updateUserUI();
+});
+
+// نستمع لـ onAuthStateChanged من Firebase module
+// سيتم استدعاء updateUserUI عندما يكتمل
+function onFirebaseAuthReady(){
+  authReady = true;
+}
+
 function handleImg(input){
   const file=input.files[0];
   if(!file)return;
@@ -974,11 +963,12 @@ function postAd(){
   const desc=document.getElementById('ad-desc').value.trim();
   const cat=document.getElementById('ad-cat').value;
   const wilaya=document.getElementById('ad-wilaya').value;
-  const phone=document.getElementById('ad-phone').value.trim()||currentUser.phone;
+  const phone=document.getElementById('ad-phone').value.trim()||(currentUser?currentUser.phone:'');
   if(!title||!price||!desc){toast('يرجى ملء جميع الحقول المطلوبة *','err');return;}
+  if(!wilaya){toast('يرجى اختيار الولاية','err');return;}
   const newAd={
     id:Date.now(),title,category:cat,price,wilaya,description:desc,
-    phone,image:imgBase64,seller:currentUser.name,
+    phone,image:imgBase64,seller:currentUser?currentUser.name:'مجهول',
     date:'الآن',verified:false,views:0,isNew:true
   };
   listings=[newAd,...listings];
@@ -993,7 +983,6 @@ function postAd(){
   switchTab('home');
 }
 
-// ===== PROFILE =====
 function renderProfile(){
   const el=document.getElementById('profile-content');
   if(!currentUser){
@@ -1012,7 +1001,7 @@ function renderProfile(){
       <div style="text-align:center;margin-bottom:20px;">
         <div class="p-avatar">${currentUser.name[0]}</div>
         <div style="font-size:20px;font-weight:900;color:#222;">${currentUser.name}</div>
-        <div style="font-size:13px;color:#888;margin-top:4px;">مرحباً بك في سوق الدواجن DZ</div>
+        <div style="font-size:13px;color:#888;margin-top:4px;">${currentUser.phone}</div>
       </div>
       <div class="p-item" onclick="closeSheet('sheet-profile');requireAuth('post');">
         <div style="font-size:20px;">➕</div>
@@ -1045,14 +1034,14 @@ function renderProfile(){
 }
 
 function doLogout(){
-  window.firebaseLogout();
-  currentUser=null;
-  updateUserUI();
-  closeSheet('sheet-profile');
-  toast('تم تسجيل الخروج');
+  window.firebaseLogout().then(()=>{
+    currentUser=null;
+    updateUserUI();
+    closeSheet('sheet-profile');
+    toast('تم تسجيل الخروج');
+  });
 }
 
-// ===== TABS =====
 const TABS=['home','search','favs'];
 function switchTab(tab){
   TABS.forEach(t=>{
@@ -1061,7 +1050,6 @@ function switchTab(tab){
     const lbl=document.getElementById('lbl-'+t);
     if(lbl) lbl.className='lbl'+(t===tab?' on':'');
   });
-  // post page
   const pgPost=document.getElementById('pg-post');
   if(pgPost) pgPost.className='page'+(tab==='post'?' on':'');
   const lblPost=document.getElementById('lbl-post');
@@ -1072,16 +1060,29 @@ function switchTab(tab){
 
   if(tab==='favs') renderFavs();
   if(tab==='search') renderSearch();
+  // ✅ عند الانتقال لصفحة النشر، تحديث UI بناءً على حالة المستخدم الحالية
   if(tab==='post') updateUserUI();
 }
 
 function goHome(){switchTab('home');}
 
-// ===== INIT =====
+// ✅ الـ onAuthStateChanged في Firebase module سيستدعي updateUserUI
+// نحتاج نربط المتغير العالمي currentUser بالصحيح
+Object.defineProperty(window, 'currentUser', {
+  get: function() { return _currentUser; },
+  set: function(val) {
+    _currentUser = val;
+    if(val !== undefined) {
+      authReady = true;
+    }
+  },
+  configurable: true
+});
+let _currentUser = null;
+
 renderCats();
 renderCards();
-updateUserUI();
+// لا نستدعي updateUserUI هنا — Firebase سيستدعيها عند جاهزيته
 </script>
 </body>
 </html>
-
