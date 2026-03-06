@@ -6,6 +6,71 @@
 <title>سوق الدواجن DZ</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐔</text></svg>"/>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet"/>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBVXf67PFcpn-4INN8kwzm1D4lbKjpGAeg",
+    authDomain: "souk-dawajin-40937.firebaseapp.com",
+    projectId: "souk-dawajin-40937",
+    storageBucket: "souk-dawajin-40937.firebasestorage.app",
+    messagingSenderId: "388100602717",
+    appId: "1:388100602717:web:3538e81d8e6b1ba97246b4",
+    measurementId: "G-F9NLTTE0XC"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // مراقبة حالة تسجيل الدخول
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      window.currentUser = { name: user.displayName || user.email.split('@')[0], phone: user.email, uid: user.uid };
+    } else {
+      window.currentUser = null;
+    }
+    if (typeof updateUserUI === 'function') updateUserUI();
+  });
+
+  // تسجيل دخول
+  window.firebaseLogin = async function(email, password) {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      return { success: true };
+    } catch (e) {
+      const msgs = {
+        'auth/user-not-found': 'الحساب غير موجود',
+        'auth/wrong-password': 'كلمة المرور خاطئة',
+        'auth/invalid-email': 'البريد الإلكتروني غير صحيح',
+        'auth/invalid-credential': 'البريد أو كلمة المرور خاطئة',
+      };
+      return { success: false, msg: msgs[e.code] || 'حدث خطأ، حاول مجدداً' };
+    }
+  };
+
+  // إنشاء حساب
+  window.firebaseRegister = async function(name, email, password) {
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(cred.user, { displayName: name });
+      window.currentUser = { name, phone: email, uid: cred.user.uid };
+      return { success: true };
+    } catch (e) {
+      const msgs = {
+        'auth/email-already-in-use': 'البريد مسجل مسبقاً',
+        'auth/invalid-email': 'البريد الإلكتروني غير صحيح',
+        'auth/weak-password': 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
+      };
+      return { success: false, msg: msgs[e.code] || 'حدث خطأ، حاول مجدداً' };
+    }
+  };
+
+  // تسجيل الخروج
+  window.firebaseLogout = async function() {
+    await signOut(auth);
+  };
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{font-family:'Tajawal',sans-serif;background:#f0f0f5;min-height:100vh;}
@@ -624,13 +689,14 @@ select.form-input{appearance:none;}
     </div>
     <div id="auth-login">
       <div class="form-group">
-        <label class="form-label">رقم الهاتف</label>
-        <input class="form-input" id="l-phone" placeholder="06xxxxxxxx"/>
+        <label class="form-label">البريد الإلكتروني</label>
+        <input class="form-input" id="l-phone" type="email" placeholder="example@email.com"/>
       </div>
       <div class="form-group">
         <label class="form-label">كلمة المرور</label>
         <input class="form-input" type="password" id="l-pass" placeholder="كلمة المرور"/>
       </div>
+      <div id="login-err" style="color:#c62828;font-size:13px;margin-bottom:10px;display:none;"></div>
       <button class="btn-submit-green" onclick="doLogin()">تسجيل الدخول</button>
     </div>
     <div id="auth-reg" style="display:none;">
@@ -639,13 +705,14 @@ select.form-input{appearance:none;}
         <input class="form-input" id="r-name" placeholder="الاسم الكامل"/>
       </div>
       <div class="form-group">
-        <label class="form-label">رقم الهاتف</label>
-        <input class="form-input" id="r-phone" placeholder="06xxxxxxxx"/>
+        <label class="form-label">البريد الإلكتروني</label>
+        <input class="form-input" id="r-phone" type="email" placeholder="example@email.com"/>
       </div>
       <div class="form-group">
-        <label class="form-label">كلمة المرور</label>
+        <label class="form-label">كلمة المرور (6 أحرف على الأقل)</label>
         <input class="form-input" type="password" id="r-pass" placeholder="كلمة المرور"/>
       </div>
+      <div id="reg-err" style="color:#c62828;font-size:13px;margin-bottom:10px;display:none;"></div>
       <button class="btn-submit" onclick="doRegister()">إنشاء الحساب</button>
     </div>
   </div>
@@ -832,24 +899,43 @@ function switchAuthTab(tab){
   document.getElementById('atab-login').className='a-tab'+(tab==='login'?' on':'');
   document.getElementById('atab-reg').className='a-tab'+(tab==='reg'?' on':'');
 }
-function doLogin(){
+async function doLogin(){
   const ph=document.getElementById('l-phone').value.trim();
   const pw=document.getElementById('l-pass').value.trim();
+  const errEl=document.getElementById('login-err');
+  errEl.style.display='none';
   if(!ph||!pw){toast('يرجى ملء جميع الحقول','err');return;}
-  currentUser={name:'مستخدم',phone:ph};
-  updateUserUI();
-  closeSheet('sheet-auth');
-  toast('مرحباً بك في سوق الدواجن! 🐔');
+  const btn=document.querySelector('#auth-login .btn-submit-green');
+  btn.textContent='جاري التحقق...'; btn.disabled=true;
+  const res=await window.firebaseLogin(ph,pw);
+  btn.textContent='تسجيل الدخول'; btn.disabled=false;
+  if(res.success){
+    closeSheet('sheet-auth');
+    toast('مرحباً بك في سوق الدواجن! 🐔');
+  } else {
+    errEl.textContent=res.msg;
+    errEl.style.display='block';
+  }
 }
-function doRegister(){
+async function doRegister(){
   const n=document.getElementById('r-name').value.trim();
   const ph=document.getElementById('r-phone').value.trim();
   const pw=document.getElementById('r-pass').value.trim();
+  const errEl=document.getElementById('reg-err');
+  errEl.style.display='none';
   if(!n||!ph||!pw){toast('يرجى ملء جميع الحقول','err');return;}
-  currentUser={name:n,phone:ph};
-  updateUserUI();
-  closeSheet('sheet-auth');
-  toast('تم إنشاء حسابك بنجاح! 🎉');
+  const btn=document.querySelector('#auth-reg .btn-submit');
+  btn.textContent='جاري الإنشاء...'; btn.disabled=true;
+  const res=await window.firebaseRegister(n,ph,pw);
+  btn.textContent='إنشاء الحساب'; btn.disabled=false;
+  if(res.success){
+    updateUserUI();
+    closeSheet('sheet-auth');
+    toast('تم إنشاء حسابك بنجاح! 🎉');
+  } else {
+    errEl.textContent=res.msg;
+    errEl.style.display='block';
+  }
 }
 function updateUserUI(){
   document.getElementById('s3').textContent=currentUser?1:0;
@@ -959,6 +1045,7 @@ function renderProfile(){
 }
 
 function doLogout(){
+  window.firebaseLogout();
   currentUser=null;
   updateUserUI();
   closeSheet('sheet-profile');
@@ -997,3 +1084,4 @@ updateUserUI();
 </script>
 </body>
 </html>
+
