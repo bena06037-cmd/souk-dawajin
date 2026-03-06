@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>سوق الدواجن DZ</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐔</text></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{font-family:'Tajawal',sans-serif;background:#f0f0f5;min-height:100vh;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:#2e7d32;border-radius:4px;}
+
+/* ===== WRAPPER ===== */
+#app{max-width:480px;margin:0 auto;min-height:100vh;background:#f7f7fc;position:relative;padding-bottom:80px;box-shadow:0 0 40px rgba(0,0,0,0.12);}
+
+/* ===== TOP BAR ===== */
+.topbar{
+  background:#fff;
+  padding:12px 14px 10px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid #eee;
+  position:sticky;top:0;z-index:60;
+  gap:10px;
+}
+.topbar-logo{
+  width:44px;height:44px;
+  background:linear-gradient(135deg,#1b5e20,#43a047);
+  border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;flex-shrink:0;
+}
+.topbar-brand{flex:1;text-align:center;}
+.topbar-brand .name{font-size:17px;font-weight:900;color:#1b5e20;}
+.topbar-brand .sub{font-size:11px;color:#888;}
+.btn-post-top{
+  background:linear-gradient(135deg,#1565c0,#1e88e5);
+  color:#fff;font-weight:800;border:none;cursor:pointer;
+  border-radius:22px;padding:9px 14px;font-size:13px;
+  font-family:'Tajawal',sans-serif;white-space:nowrap;
+  box-shadow:0 4px 14px rgba(21,101,192,0.35);
+  display:flex;align-items:center;gap:5px;
+}
+
+/* ===== SEARCH ===== */
+.search-wrap{
+  padding:10px 12px 8px;
+  background:#fff;
+  border-bottom:1px solid #f0f0f0;
+  display:flex;gap:8px;align-items:center;
+}
+.search-box{
+  flex:1;display:flex;align-items:center;
+  background:#f5f5f5;border-radius:22px;overflow:hidden;
+  border:1.5px solid #e8e8e8;
+}
+.search-box input{
+  flex:1;border:none;outline:none;background:transparent;
+  padding:10px 14px;font-size:14px;
+  font-family:'Tajawal',sans-serif;color:#333;
+}
+.search-box .ico{padding:10px 12px;font-size:18px;cursor:pointer;}
+.filter-btn{
+  background:#f0faf0;border:1.5px solid #81c784;
+  border-radius:22px;padding:9px 14px;
+  font-size:13px;font-weight:700;color:#2e7d32;
+  cursor:pointer;font-family:'Tajawal',sans-serif;
+  white-space:nowrap;
+}
+
+/* ===== CATEGORIES ===== */
+.cat-row{
+  display:flex;gap:8px;padding:10px 12px;
+  overflow-x:auto;scrollbar-width:none;
+  background:#fff;border-bottom:1px solid #f0f0f0;
+}
+.cat-row::-webkit-scrollbar{display:none;}
+.cat-chip{
+  display:flex;align-items:center;gap:4px;
+  padding:8px 16px;border-radius:22px;
+  border:1.5px solid #ddd;background:#fff;
+  font-size:13px;font-weight:700;color:#666;
+  cursor:pointer;white-space:nowrap;
+  font-family:'Tajawal',sans-serif;transition:all .2s;
+  flex-shrink:0;
+}
+.cat-chip.on{
+  background:linear-gradient(135deg,#1565c0,#1976d2);
+  border-color:transparent;color:#fff;
+  box-shadow:0 4px 12px rgba(21,101,192,0.3);
+}
+
+/* ===== HERO ===== */
+.hero{
+  margin:12px;border-radius:20px;overflow:hidden;
+  background:linear-gradient(135deg,#1b5e20 0%,#2e7d32 40%,#43a047 100%);
+  padding:22px 20px;display:flex;align-items:center;justify-content:space-between;
+  position:relative;
+}
+.hero::after{
+  content:'';position:absolute;
+  top:-40px;left:-40px;width:160px;height:160px;
+  background:rgba(255,255,255,0.05);border-radius:50%;
+}
+.hero-txt .badge{
+  display:inline-flex;align-items:center;gap:4px;
+  background:#f5c842;color:#1a1208;
+  padding:3px 12px;border-radius:20px;
+  font-size:11px;font-weight:800;margin-bottom:8px;
+}
+.hero-txt h2{color:#fff;font-size:22px;font-weight:900;line-height:1.2;margin-bottom:4px;}
+.hero-txt p{color:rgba(255,255,255,.8);font-size:12px;}
+.hero-img{font-size:68px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.25));flex-shrink:0;}
+
+/* ===== STATS ===== */
+.stats{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  margin:0 12px;background:#fff;border-radius:16px;
+  overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.06);
+}
+.stat{padding:14px 6px;text-align:center;border-left:1px solid #f5f5f5;}
+.stat:last-child{border-left:none;}
+.stat .n{font-size:22px;font-weight:900;color:#2e7d32;}
+.stat .l{font-size:11px;color:#aaa;margin-top:2px;}
+
+/* ===== SECTION HEAD ===== */
+.sec-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 14px 6px;
+}
+.sec-head .title{font-size:16px;font-weight:900;color:#222;}
+.sec-head .count{font-size:12px;color:#aaa;font-weight:500;}
+
+/* ===== GRID ===== */
+.grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:10px;padding:4px 12px 8px;
+}
+
+/* ===== CARD ===== */
+.card{
+  background:#fff;border-radius:18px;overflow:hidden;
+  box-shadow:0 2px 10px rgba(0,0,0,.07);
+  cursor:pointer;transition:transform .2s,box-shadow .2s;
+  position:relative;
+}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(0,0,0,.12);}
+.card-img{
+  width:100%;height:130px;
+  background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
+  display:flex;align-items:center;justify-content:center;
+  font-size:52px;position:relative;overflow:hidden;
+}
+.card-img img{width:100%;height:100%;object-fit:cover;}
+.card-badge{
+  position:absolute;top:8px;right:8px;
+  background:linear-gradient(135deg,#1565c0,#1976d2);
+  color:#fff;font-size:10px;font-weight:800;
+  padding:3px 9px;border-radius:12px;
+  font-family:'Tajawal',sans-serif;
+}
+.card-badge.verified{background:linear-gradient(135deg,#2e7d32,#43a047);}
+.fav-btn{
+  position:absolute;top:8px;left:8px;
+  background:rgba(255,255,255,.9);border:none;
+  width:30px;height:30px;border-radius:50%;
+  cursor:pointer;font-size:15px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 6px rgba(0,0,0,.12);
+}
+.card-body{padding:10px 10px 12px;}
+.card-cat{font-size:10px;color:#1565c0;font-weight:700;margin-bottom:3px;}
+.card-title{font-size:13px;font-weight:800;color:#222;line-height:1.3;margin-bottom:4px;}
+.card-desc{font-size:11px;color:#999;line-height:1.5;margin-bottom:6px;}
+.card-price{font-size:16px;font-weight:900;color:#2e7d32;margin-bottom:4px;}
+.card-loc{font-size:11px;color:#bbb;margin-bottom:10px;display:flex;align-items:center;gap:3px;}
+.card-actions{display:flex;gap:6px;}
+.btn-detail{
+  flex:1;background:#f5f5f5;border:none;cursor:pointer;
+  border-radius:10px;padding:8px 6px;font-size:12px;
+  font-weight:700;color:#555;font-family:'Tajawal',sans-serif;
+}
+.btn-contact{
+  flex:1;background:linear-gradient(135deg,#2e7d32,#43a047);
+  border:none;cursor:pointer;border-radius:10px;padding:8px 6px;
+  font-size:12px;font-weight:800;color:#fff;
+  font-family:'Tajawal',sans-serif;
+  display:flex;align-items:center;justify-content:center;gap:4px;
+}
+
+/* ===== FLOATING POST BTN ===== */
+.float-btn{
+  position:fixed;bottom:82px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,#1565c0,#1e88e5);
+  color:#fff;font-weight:800;border:none;cursor:pointer;
+  border-radius:30px;padding:14px 28px;font-size:15px;
+  font-family:'Tajawal',sans-serif;
+  box-shadow:0 6px 22px rgba(21,101,192,0.45);
+  display:flex;align-items:center;gap:8px;
+  z-index:40;white-space:nowrap;
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{box-shadow:0 6px 22px rgba(21,101,192,0.45);}50%{box-shadow:0 6px 32px rgba(21,101,192,0.65);}}
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;
+  background:#fff;border-top:1px solid #eee;
+  display:flex;z-index:50;
+  box-shadow:0 -4px 16px rgba(0,0,0,.08);
+}
+.btab{
+  flex:1;padding:10px 4px 8px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;border:none;background:none;
+  font-family:'Tajawal',sans-serif;
+}
+.btab .ico{font-size:22px;}
+.btab .lbl{font-size:10px;font-weight:700;color:#bbb;}
+.btab .lbl.on{color:#2e7d32;}
+.btab.post-tab .ico{
+  background:linear-gradient(135deg,#1565c0,#1976d2);
+  border-radius:50%;width:46px;height:46px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin-top:-14px;
+  box-shadow:0 4px 14px rgba(21,101,192,0.4);
+}
+
+/* ===== OVERLAY / MODAL ===== */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.55);
+  z-index:100;display:flex;align-items:flex-end;justify-content:center;
+}
+.sheet{
+  background:#fff;width:100%;max-width:480px;
+  border-radius:24px 24px 0 0;
+  padding:16px 18px 50px;max-height:92vh;overflow-y:auto;
+}
+.sheet-handle{width:40px;height:4px;background:#ddd;border-radius:4px;margin:0 auto 16px;}
+.sheet-title{font-size:18px;font-weight:900;color:#222;text-align:center;margin-bottom:20px;}
+
+/* ===== DETAIL SHEET ===== */
+.detail-img-big{
+  width:100%;height:200px;
+  background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
+  display:flex;align-items:center;justify-content:center;
+  font-size:90px;border-radius:16px;margin-bottom:16px;
+  overflow:hidden;position:relative;
+}
+.detail-img-big img{width:100%;height:100%;object-fit:cover;}
+.price-big{font-size:28px;font-weight:900;color:#2e7d32;margin-bottom:4px;}
+.detail-title{font-size:20px;font-weight:900;color:#222;margin-bottom:12px;}
+.info-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #f5f5f5;font-size:14px;color:#555;}
+.contact-section{margin-top:16px;}
+.phone-big{font-size:22px;font-weight:900;color:#2e7d32;text-align:center;direction:ltr;padding:12px;background:#f0faf0;border-radius:12px;margin-bottom:10px;}
+.call-btn-big{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  background:linear-gradient(135deg,#1b5e20,#43a047);color:#fff;
+  font-weight:800;border:none;cursor:pointer;
+  border-radius:14px;padding:16px;font-size:16px;
+  font-family:'Tajawal',sans-serif;width:100%;text-decoration:none;
+}
+.whatsapp-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  background:linear-gradient(135deg,#1a7726,#25d366);color:#fff;
+  font-weight:800;border:none;cursor:pointer;
+  border-radius:14px;padding:14px;font-size:15px;
+  font-family:'Tajawal',sans-serif;width:100%;text-decoration:none;
+  margin-top:8px;
+}
+
+/* ===== FORM ===== */
+.form-group{margin-bottom:14px;}
+.form-label{display:block;font-size:13px;font-weight:700;color:#555;margin-bottom:7px;}
+.form-input{
+  width:100%;background:#f8f8f8;border:1.5px solid #e8e8e8;
+  color:#333;border-radius:12px;padding:13px 15px;
+  font-size:14px;font-family:'Tajawal',sans-serif;
+  transition:border .2s;
+}
+.form-input:focus{outline:none;border-color:#2e7d32;background:#fff;}
+textarea.form-input{resize:vertical;min-height:85px;}
+select.form-input{appearance:none;}
+.btn-submit{
+  background:linear-gradient(135deg,#1565c0,#1e88e5);
+  color:#fff;font-weight:800;border:none;cursor:pointer;
+  border-radius:14px;padding:15px;font-size:16px;
+  font-family:'Tajawal',sans-serif;width:100%;margin-top:6px;
+}
+.btn-submit-green{
+  background:linear-gradient(135deg,#1b5e20,#43a047);
+  color:#fff;font-weight:800;border:none;cursor:pointer;
+  border-radius:14px;padding:15px;font-size:16px;
+  font-family:'Tajawal',sans-serif;width:100%;margin-top:6px;
+}
+
+/* ===== AUTH TABS ===== */
+.auth-tabs{display:flex;background:#f5f5f5;border-radius:12px;padding:4px;margin-bottom:18px;}
+.a-tab{
+  flex:1;padding:10px;text-align:center;
+  font-size:14px;font-weight:700;cursor:pointer;
+  border-radius:9px;border:none;background:none;
+  font-family:'Tajawal',sans-serif;color:#999;
+}
+.a-tab.on{background:#fff;color:#1565c0;box-shadow:0 2px 8px rgba(0,0,0,.1);}
+
+/* ===== UPLOAD ===== */
+.upload-area{
+  border:2px dashed #c8e6c9;border-radius:14px;
+  padding:24px;text-align:center;cursor:pointer;
+  background:#f9fff9;position:relative;
+  transition:border .2s;
+}
+.upload-area:hover{border-color:#2e7d32;}
+.upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+
+/* ===== PROFILE MENU ===== */
+.p-avatar{
+  width:76px;height:76px;
+  background:linear-gradient(135deg,#1b5e20,#43a047);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:32px;margin:0 auto 10px;color:#fff;font-weight:900;
+}
+.p-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 0;border-bottom:1px solid #f5f5f5;cursor:pointer;
+}
+.p-badge{
+  background:#2e7d32;color:#fff;
+  width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:800;
+}
+
+/* ===== TOAST ===== */
+.toast{
+  position:fixed;top:70px;left:50%;transform:translateX(-50%);
+  z-index:999;padding:12px 22px;border-radius:14px;
+  font-weight:800;font-size:14px;white-space:nowrap;
+  font-family:'Tajawal',sans-serif;
+  box-shadow:0 8px 24px rgba(0,0,0,.2);
+}
+.t-ok{background:linear-gradient(135deg,#1b5e20,#43a047);color:#fff;}
+.t-err{background:linear-gradient(135deg,#b71c1c,#e53935);color:#fff;}
+
+/* ===== EMPTY ===== */
+.empty{text-align:center;padding:70px 20px;color:#ccc;}
+.empty .ei{font-size:60px;margin-bottom:12px;}
+.empty .et{font-size:16px;font-weight:700;color:#bbb;}
+
+/* ===== PAGES ===== */
+.page{display:none;}
+.page.on{display:block;}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- TOAST -->
+<div id="toast" class="toast" style="display:none"></div>
+
+<!-- ============ HOME PAGE ============ -->
+<div id="pg-home" class="page on">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="btn-post-top" onclick="requireAuth('post')">✨ أنشر إعلانك</button>
+    <div class="topbar-brand">
+      <div class="name">🐔 سوق الدواجن DZ</div>
+      <div class="sub">بيع · شراء · تبادل</div>
+    </div>
+    <div class="topbar-logo">🐔</div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-wrap">
+    <div class="search-box">
+      <span class="ico">🔍</span>
+      <input id="search-inp" type="text" placeholder="ابحث: دجاج، بيض، أعلاف..." oninput="renderCards()"/>
+    </div>
+    <button class="filter-btn" onclick="setCat('all')">🔄 الكل</button>
+  </div>
+
+  <!-- CATS -->
+  <div class="cat-row" id="cat-row"></div>
+
+  <!-- HERO -->
+  <div class="hero" style="margin-top:10px;">
+    <div class="hero-txt">
+      <div class="badge">✨ مرحباً بكم</div>
+      <h2>سوق الدواجن<br/>الجزائري</h2>
+      <p>أنشر إعلانك مجاناً الآن</p>
+    </div>
+    <div class="hero-img">🐓</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats" style="margin-top:10px;" id="stats-row">
+    <div class="stat"><div class="n" id="s1">6</div><div class="l">إعلان نشط</div></div>
+    <div class="stat"><div class="n">58</div><div class="l">ولاية</div></div>
+    <div class="stat"><div class="n" id="s3">0</div><div class="l">بائع مسجل</div></div>
+  </div>
+
+  <!-- SECTION HEADER -->
+  <div class="sec-head" style="margin-top:10px;">
+    <div class="title">📢 الإعلانات</div>
+    <div class="count" id="count-lbl"></div>
+  </div>
+
+  <!-- GRID -->
+  <div class="grid" id="cards-grid"></div>
+
+  <!-- EMPTY -->
+  <div id="empty-state" class="empty" style="display:none">
+    <div class="ei">🐔</div>
+    <div class="et">لا توجد إعلانات</div>
+  </div>
+
+</div><!-- end home -->
+
+<!-- ============ FAVS PAGE ============ -->
+<div id="pg-favs" class="page">
+  <div class="topbar">
+    <div></div>
+    <div class="topbar-brand"><div class="name">❤️ المفضلة</div></div>
+    <div></div>
+  </div>
+  <div class="grid" id="favs-grid" style="margin-top:10px;"></div>
+  <div id="empty-favs" class="empty" style="display:none">
+    <div class="ei">🤍</div>
+    <div class="et">لا توجد مفضلة بعد</div>
+    <div style="font-size:12px;color:#ddd;margin-top:6px;">اضغط 🤍 في أي إعلان</div>
+  </div>
+</div>
+
+<!-- ============ SEARCH PAGE ============ -->
+<div id="pg-search" class="page">
+  <div class="topbar">
+    <div></div>
+    <div class="topbar-brand"><div class="name">🔍 البحث</div></div>
+    <div></div>
+  </div>
+  <div class="search-wrap">
+    <div class="search-box" style="flex:1">
+      <span class="ico">🔍</span>
+      <input id="search-inp2" type="text" placeholder="ابحث عن أي شيء..." oninput="renderSearch()"/>
+    </div>
+  </div>
+  <div class="cat-row" id="cat-row2" style="margin-top:2px;"></div>
+  <div class="grid" id="search-grid" style="margin-top:8px;"></div>
+</div>
+
+<!-- ============ POST PAGE ============ -->
+<div id="pg-post" class="page">
+  <div class="topbar">
+    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;font-size:22px;color:#fff;">←</button>
+    <div class="topbar-brand"><div class="name">📢 نشر إعلان</div></div>
+    <div></div>
+  </div>
+  <div id="post-locked" style="text-align:center;padding:80px 24px;display:none;">
+    <div style="font-size:56px;margin-bottom:14px;">🔒</div>
+    <div style="font-size:18px;font-weight:800;color:#222;margin-bottom:8px;">يجب تسجيل الدخول أولاً</div>
+    <div style="font-size:14px;color:#888;margin-bottom:20px;">سجل دخولك لنشر إعلاناتك مجاناً</div>
+    <button class="btn-submit" style="max-width:220px;margin:0 auto;" onclick="showSheet('auth')">تسجيل الدخول</button>
+  </div>
+  <div id="post-form" style="padding:16px;display:none;">
+    <div style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-radius:16px;padding:14px;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+      <div style="font-size:32px;">📢</div>
+      <div><div style="font-size:15px;font-weight:900;color:#1b5e20;">نشر إعلان مجاناً</div><div style="font-size:12px;color:#555;">أضف تفاصيل إعلانك أدناه</div></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">📝 عنوان الإعلان *</label>
+      <input class="form-input" id="ad-title" placeholder="مثال: دجاج لاحم عمر 45 يوم للبيع"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">📂 الفئة *</label>
+      <select class="form-input" id="ad-cat">
+        <option value="broiler">🐔 دجاج لاحم</option>
+        <option value="layer">🐓 دجاج بياض</option>
+        <option value="eggs">🥚 بيض</option>
+        <option value="turkey">🦃 ديك رومي</option>
+        <option value="feed">🌾 أعلاف</option>
+        <option value="vet">💉 بيطري وأدوية</option>
+        <option value="chicks">🐣 كتاكيت</option>
+        <option value="equip">🏗️ معدات</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="form-group">
+        <label class="form-label">💰 السعر *</label>
+        <input class="form-input" id="ad-price" placeholder="380 دج/كغ"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">📍 الولاية *</label>
+        <select class="form-input" id="ad-wilaya">
+          <option value="">-- اختر الولاية --</option>
+          <option>01 - أدرار</option>
+          <option>02 - الشلف</option>
+          <option>03 - الأغواط</option>
+          <option>04 - أم البواقي</option>
+          <option>05 - باتنة</option>
+          <option>06 - بجاية</option>
+          <option>07 - بسكرة</option>
+          <option>08 - بشار</option>
+          <option>09 - البليدة</option>
+          <option>10 - البويرة</option>
+          <option>11 - تمنراست</option>
+          <option>12 - تبسة</option>
+          <option>13 - تلمسان</option>
+          <option>14 - تيارت</option>
+          <option>15 - تيزي وزو</option>
+          <option>16 - الجزائر</option>
+          <option>17 - الجلفة</option>
+          <option>18 - جيجل</option>
+          <option>19 - سطيف</option>
+          <option>20 - سعيدة</option>
+          <option>21 - سكيكدة</option>
+          <option>22 - سيدي بلعباس</option>
+          <option>23 - عنابة</option>
+          <option>24 - قالمة</option>
+          <option>25 - قسنطينة</option>
+          <option>26 - المدية</option>
+          <option>27 - مستغانم</option>
+          <option>28 - المسيلة</option>
+          <option>29 - معسكر</option>
+          <option>30 - ورقلة</option>
+          <option>31 - وهران</option>
+          <option>32 - البيض</option>
+          <option>33 - إليزي</option>
+          <option>34 - برج بوعريريج</option>
+          <option>35 - بومرداس</option>
+          <option>36 - الطارف</option>
+          <option>37 - تندوف</option>
+          <option>38 - تسمسيلت</option>
+          <option>39 - الوادي</option>
+          <option>40 - خنشلة</option>
+          <option>41 - سوق أهراس</option>
+          <option>42 - تيبازة</option>
+          <option>43 - ميلة</option>
+          <option>44 - عين الدفلى</option>
+          <option>45 - النعامة</option>
+          <option>46 - عين تيموشنت</option>
+          <option>47 - غرداية</option>
+          <option>48 - رليزان</option>
+          <option>49 - تيميمون</option>
+          <option>50 - برج باجي مختار</option>
+          <option>51 - أولاد جلال</option>
+          <option>52 - بني عباس</option>
+          <option>53 - عين صالح</option>
+          <option>54 - عين قزام</option>
+          <option>55 - توقرت</option>
+          <option>56 - جانت</option>
+          <option>57 - المغير</option>
+          <option>58 - المنيعة</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">📄 الوصف *</label>
+      <textarea class="form-input" id="ad-desc" placeholder="اكتب تفاصيل المنتج: الكمية، الحالة الصحية، التحصينات..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">📞 رقم التواصل</label>
+      <input class="form-input" id="ad-phone" placeholder="06xxxxxxxx"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">📸 صورة المنتج</label>
+      <div class="upload-area" id="upload-area">
+        <div id="upload-placeholder">
+          <div style="font-size:38px;margin-bottom:8px;">📸</div>
+          <div style="font-weight:700;color:#333;margin-bottom:4px;">اضغط لرفع صورة</div>
+          <div style="font-size:12px;color:#999;">JPG أو PNG</div>
+        </div>
+        <img id="img-preview" style="max-height:160px;border-radius:10px;display:none;" alt="preview"/>
+        <input type="file" accept="image/*" onchange="handleImg(this)"/>
+      </div>
+    </div>
+    <button class="btn-submit" onclick="postAd()">🚀 نشر الإعلان مجاناً</button>
+  </div>
+</div>
+
+<!-- ============ BOTTOM NAV ============ -->
+<div class="bottom-nav">
+  <button class="btab" id="tab-home" onclick="switchTab('home')">
+    <span class="ico">🏠</span><span class="lbl on" id="lbl-home">الرئيسية</span>
+  </button>
+  <button class="btab" id="tab-search" onclick="switchTab('search')">
+    <span class="ico">🔍</span><span class="lbl" id="lbl-search">بحث</span>
+  </button>
+  <button class="btab post-tab" onclick="requireAuth('post')">
+    <span class="ico">➕</span><span class="lbl" id="lbl-post">نشر</span>
+  </button>
+  <button class="btab" id="tab-favs" onclick="switchTab('favs')">
+    <span class="ico">❤️</span><span class="lbl" id="lbl-favs">المفضلة</span>
+  </button>
+  <button class="btab" id="tab-profile" onclick="showSheet('profile')">
+    <span class="ico">👤</span><span class="lbl" id="lbl-profile">حسابي</span>
+  </button>
+</div>
+
+<!-- FLOAT BTN -->
+<button class="float-btn" id="float-btn" onclick="requireAuth('post')">✨ أنشر إعلانك مجاناً</button>
+
+<!-- ============ SHEETS ============ -->
+
+<!-- DETAIL SHEET -->
+<div id="sheet-detail" class="overlay" style="display:none;" onclick="closeSheetIf(event,'sheet-detail')">
+  <div class="sheet" id="detail-content"></div>
+</div>
+
+<!-- AUTH SHEET -->
+<div id="sheet-auth" class="overlay" style="display:none;" onclick="closeSheetIf(event,'sheet-auth')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div style="text-align:center;margin-bottom:18px;">
+      <div style="font-size:44px;margin-bottom:8px;">🐔</div>
+      <div style="font-size:20px;font-weight:900;color:#1b5e20;">سوق الدواجن DZ</div>
+    </div>
+    <div class="auth-tabs">
+      <button class="a-tab on" id="atab-login" onclick="switchAuthTab('login')">تسجيل الدخول</button>
+      <button class="a-tab" id="atab-reg" onclick="switchAuthTab('reg')">إنشاء حساب</button>
+    </div>
+    <div id="auth-login">
+      <div class="form-group">
+        <label class="form-label">رقم الهاتف</label>
+        <input class="form-input" id="l-phone" placeholder="06xxxxxxxx"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">كلمة المرور</label>
+        <input class="form-input" type="password" id="l-pass" placeholder="كلمة المرور"/>
+      </div>
+      <button class="btn-submit-green" onclick="doLogin()">تسجيل الدخول</button>
+    </div>
+    <div id="auth-reg" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">الاسم الكامل</label>
+        <input class="form-input" id="r-name" placeholder="الاسم الكامل"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">رقم الهاتف</label>
+        <input class="form-input" id="r-phone" placeholder="06xxxxxxxx"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">كلمة المرور</label>
+        <input class="form-input" type="password" id="r-pass" placeholder="كلمة المرور"/>
+      </div>
+      <button class="btn-submit" onclick="doRegister()">إنشاء الحساب</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE SHEET -->
+<div id="sheet-profile" class="overlay" style="display:none;" onclick="closeSheetIf(event,'sheet-profile')">
+  <div class="sheet" id="profile-content"></div>
+</div>
+
+</div><!-- end app -->
+
+<script>
+// ===== DATA =====
+const CATS = [
+  {id:"all",label:"✨ الكل",icon:"🏪"},
+  {id:"broiler",label:"لاحم",icon:"🐔"},
+  {id:"layer",label:"بياض",icon:"🐓"},
+  {id:"eggs",label:"بيض",icon:"🥚"},
+  {id:"turkey",label:"ديك رومي",icon:"🦃"},
+  {id:"feed",label:"أعلاف",icon:"🌾"},
+  {id:"vet",label:"بيطري",icon:"💉"},
+  {id:"chicks",label:"كتاكيت",icon:"🐣"},
+  {id:"equip",label:"معدات",icon:"🏗️"},
+];
+
+let listings = [];
+
+let favs = [];
+let currentCat = "all";
+let currentUser = null;
+let imgBase64 = null;
+
+// ===== ICONS =====
+function catIcon(id){const c=CATS.find(x=>x.id===id);return c?c.icon:"📦";}
+function catLabel(id){const c=CATS.find(x=>x.id===id);return c?c.label:id;}
+
+// ===== TOAST =====
+function toast(msg,type){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.className='toast '+(type==='err'?'t-err':'t-ok');
+  el.style.display='block';
+  setTimeout(()=>el.style.display='none',2800);
+}
+
+// ===== RENDER CATEGORIES =====
+function renderCats(){
+  ['cat-row','cat-row2'].forEach(id=>{
+    const row=document.getElementById(id);
+    if(!row)return;
+    row.innerHTML=CATS.map(c=>`
+      <span class="cat-chip ${currentCat===c.id?'on':''}" onclick="setCat('${c.id}')">${c.icon} ${c.label}</span>
+    `).join('');
+  });
+}
+
+function setCat(id){
+  currentCat=id;
+  renderCats();
+  renderCards();
+  renderSearch();
+}
+
+// ===== RENDER CARD HTML =====
+function cardHTML(l){
+  const isFav=favs.includes(l.id);
+  const img=l.image
+    ?`<img src="${l.image}" alt=""/>`
+    :`<span>${catIcon(l.category)}</span>`;
+  const badge=l.verified
+    ?`<div class="card-badge verified">✅ موثق</div>`
+    :(l.isNew?`<div class="card-badge">✨ جديد</div>`:'');
+  return `
+    <div class="card" id="card-${l.id}">
+      <div class="card-img">
+        ${img}
+        ${badge}
+        <button class="fav-btn" onclick="toggleFav(${l.id},event)">${isFav?'❤️':'🤍'}</button>
+      </div>
+      <div class="card-body">
+        <div class="card-cat">${catIcon(l.category)} ${catLabel(l.category)}</div>
+        <div class="card-title">${l.title}</div>
+        <div class="card-desc">${l.description.substring(0,55)}...</div>
+        <div class="card-price">${l.price}</div>
+        <div class="card-loc">📍 ${l.wilaya}</div>
+        <div class="card-actions">
+          <button class="btn-detail" onclick="showDetail(${l.id})">التفاصيل</button>
+          <button class="btn-contact" onclick="callNow('${l.phone}',event)">تواصل 💬</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ===== RENDER CARDS =====
+function renderCards(){
+  const q=(document.getElementById('search-inp').value||'').trim();
+  const filtered=listings.filter(l=>{
+    const mc=currentCat==='all'||l.category===currentCat;
+    const ms=!q||l.title.includes(q)||l.wilaya.includes(q)||l.description.includes(q);
+    return mc&&ms;
+  });
+  const grid=document.getElementById('cards-grid');
+  const empty=document.getElementById('empty-state');
+  document.getElementById('count-lbl').textContent=`(${filtered.length})`;
+  document.getElementById('s1').textContent=listings.length;
+  if(filtered.length===0){grid.innerHTML='';empty.style.display='block';}
+  else{empty.style.display='none';grid.innerHTML=filtered.map(cardHTML).join('');}
+}
+
+function renderSearch(){
+  const q=(document.getElementById('search-inp2').value||'').trim();
+  const filtered=listings.filter(l=>{
+    const mc=currentCat==='all'||l.category===currentCat;
+    const ms=!q||l.title.includes(q)||l.wilaya.includes(q)||l.description.includes(q);
+    return mc&&ms;
+  });
+  document.getElementById('search-grid').innerHTML=filtered.map(cardHTML).join('');
+}
+
+function renderFavs(){
+  const fl=listings.filter(l=>favs.includes(l.id));
+  const grid=document.getElementById('favs-grid');
+  const empty=document.getElementById('empty-favs');
+  if(fl.length===0){grid.innerHTML='';empty.style.display='block';}
+  else{empty.style.display='none';grid.innerHTML=fl.map(cardHTML).join('');}
+}
+
+// ===== FAV =====
+function toggleFav(id,e){
+  e.stopPropagation();
+  favs=favs.includes(id)?favs.filter(x=>x!==id):[...favs,id];
+  renderCards();renderFavs();renderSearch();
+}
+
+// ===== CALL =====
+function callNow(phone,e){
+  if(e)e.stopPropagation();
+  window.location.href='tel:'+phone;
+}
+
+// ===== DETAIL =====
+function showDetail(id){
+  const l=listings.find(x=>x.id===id);
+  if(!l)return;
+  const img=l.image
+    ?`<img src="${l.image}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"/>`
+    :catIcon(l.category);
+  document.getElementById('detail-content').innerHTML=`
+    <div class="sheet-handle"></div>
+    <div class="detail-img-big">${img}</div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;">
+      <div class="price-big">${l.price}</div>
+      ${l.verified?`<span style="background:#e8f5e9;color:#2e7d32;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:700;">✅ موثق</span>`:''}
+    </div>
+    <div class="detail-title">${l.title}</div>
+    <div style="background:#f5f5f5;border-radius:12px;padding:12px;margin-bottom:14px;font-size:14px;color:#555;line-height:1.7;">${l.description}</div>
+    <div class="info-row">📍 <strong>الولاية:</strong> ${l.wilaya}</div>
+    <div class="info-row">👤 <strong>البائع:</strong> ${l.seller}</div>
+    <div class="info-row">🏷️ <strong>الفئة:</strong> ${catIcon(l.category)} ${catLabel(l.category)}</div>
+    <div class="info-row">📅 <strong>التاريخ:</strong> ${l.date}</div>
+    <div class="info-row">👁 <strong>المشاهدات:</strong> ${l.views}</div>
+    <div class="contact-section">
+      <div class="phone-big">${l.phone}</div>
+      <a href="tel:${l.phone}" class="call-btn-big">📞 اتصل الآن</a>
+      <a href="https://wa.me/213${l.phone.substring(1)}" target="_blank" class="whatsapp-btn">💬 واتساب</a>
+    </div>
+  `;
+  document.getElementById('sheet-detail').style.display='flex';
+}
+
+// ===== SHEETS =====
+function showSheet(name){
+  if(name==='profile') renderProfile();
+  document.getElementById('sheet-'+name).style.display='flex';
+}
+function closeSheet(id){document.getElementById(id).style.display='none';}
+function closeSheetIf(e,id){if(e.target.id===id)closeSheet(id);}
+
+// ===== AUTH =====
+function switchAuthTab(tab){
+  document.getElementById('auth-login').style.display=tab==='login'?'block':'none';
+  document.getElementById('auth-reg').style.display=tab==='reg'?'block':'none';
+  document.getElementById('atab-login').className='a-tab'+(tab==='login'?' on':'');
+  document.getElementById('atab-reg').className='a-tab'+(tab==='reg'?' on':'');
+}
+function doLogin(){
+  const ph=document.getElementById('l-phone').value.trim();
+  const pw=document.getElementById('l-pass').value.trim();
+  if(!ph||!pw){toast('يرجى ملء جميع الحقول','err');return;}
+  currentUser={name:'مستخدم',phone:ph};
+  updateUserUI();
+  closeSheet('sheet-auth');
+  toast('مرحباً بك في سوق الدواجن! 🐔');
+}
+function doRegister(){
+  const n=document.getElementById('r-name').value.trim();
+  const ph=document.getElementById('r-phone').value.trim();
+  const pw=document.getElementById('r-pass').value.trim();
+  if(!n||!ph||!pw){toast('يرجى ملء جميع الحقول','err');return;}
+  currentUser={name:n,phone:ph};
+  updateUserUI();
+  closeSheet('sheet-auth');
+  toast('تم إنشاء حسابك بنجاح! 🎉');
+}
+function updateUserUI(){
+  document.getElementById('s3').textContent=currentUser?1:0;
+  const postLocked=document.getElementById('post-locked');
+  const postForm=document.getElementById('post-form');
+  if(postLocked&&postForm){
+    postLocked.style.display=currentUser?'none':'block';
+    postForm.style.display=currentUser?'block':'none';
+    if(currentUser) document.getElementById('ad-phone').placeholder=currentUser.phone;
+  }
+}
+
+// ===== REQUIRE AUTH =====
+function requireAuth(action){
+  if(!currentUser){showSheet('auth');return;}
+  if(action==='post') switchTab('post');
+}
+
+// ===== POST AD =====
+function handleImg(input){
+  const file=input.files[0];
+  if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    imgBase64=ev.target.result;
+    document.getElementById('img-preview').src=imgBase64;
+    document.getElementById('img-preview').style.display='block';
+    document.getElementById('upload-placeholder').style.display='none';
+  };
+  r.readAsDataURL(file);
+}
+
+function postAd(){
+  const title=document.getElementById('ad-title').value.trim();
+  const price=document.getElementById('ad-price').value.trim();
+  const desc=document.getElementById('ad-desc').value.trim();
+  const cat=document.getElementById('ad-cat').value;
+  const wilaya=document.getElementById('ad-wilaya').value;
+  const phone=document.getElementById('ad-phone').value.trim()||currentUser.phone;
+  if(!title||!price||!desc){toast('يرجى ملء جميع الحقول المطلوبة *','err');return;}
+  const newAd={
+    id:Date.now(),title,category:cat,price,wilaya,description:desc,
+    phone,image:imgBase64,seller:currentUser.name,
+    date:'الآن',verified:false,views:0,isNew:true
+  };
+  listings=[newAd,...listings];
+  document.getElementById('ad-title').value='';
+  document.getElementById('ad-price').value='';
+  document.getElementById('ad-desc').value='';
+  document.getElementById('ad-phone').value='';
+  document.getElementById('img-preview').style.display='none';
+  document.getElementById('upload-placeholder').style.display='block';
+  imgBase64=null;
+  toast('تم نشر إعلانك بنجاح! 🎉');
+  switchTab('home');
+}
+
+// ===== PROFILE =====
+function renderProfile(){
+  const el=document.getElementById('profile-content');
+  if(!currentUser){
+    el.innerHTML=`
+      <div class="sheet-handle"></div>
+      <div style="text-align:center;margin-bottom:20px;">
+        <div class="p-avatar">👤</div>
+        <div style="font-size:20px;font-weight:900;color:#222;">زائر</div>
+        <div style="font-size:13px;color:#888;margin-top:4px;">مرحباً بك في سوق الدواجن DZ</div>
+      </div>
+      <button class="btn-submit-green" onclick="closeSheet('sheet-profile');showSheet('auth');">تسجيل الدخول / إنشاء حساب</button>
+    `;
+  } else {
+    el.innerHTML=`
+      <div class="sheet-handle"></div>
+      <div style="text-align:center;margin-bottom:20px;">
+        <div class="p-avatar">${currentUser.name[0]}</div>
+        <div style="font-size:20px;font-weight:900;color:#222;">${currentUser.name}</div>
+        <div style="font-size:13px;color:#888;margin-top:4px;">مرحباً بك في سوق الدواجن DZ</div>
+      </div>
+      <div class="p-item" onclick="closeSheet('sheet-profile');requireAuth('post');">
+        <div style="font-size:20px;">➕</div>
+        <div style="flex:1;margin-right:10px;"><div style="font-size:15px;font-weight:800;">نشر إعلان</div><div style="font-size:12px;color:#aaa;">أضف إعلانك مجاناً</div></div>
+        <div style="color:#ccc;">›</div>
+      </div>
+      <div class="p-item">
+        <div style="display:flex;align-items:center;gap:8px;"><div class="p-badge">0</div><div style="font-size:20px;">📋</div></div>
+        <div style="flex:1;margin-right:10px;"><div style="font-size:15px;font-weight:800;">إعلاناتي</div><div style="font-size:12px;color:#aaa;">إعلاناتك المنشورة</div></div>
+        <div style="color:#ccc;">›</div>
+      </div>
+      <div class="p-item" onclick="closeSheet('sheet-profile');switchTab('favs');">
+        <div style="display:flex;align-items:center;gap:8px;"><div class="p-badge">${favs.length}</div><div style="font-size:20px;">❤️</div></div>
+        <div style="flex:1;margin-right:10px;"><div style="font-size:15px;font-weight:800;">المفضلة</div><div style="font-size:12px;color:#aaa;">الإعلانات المحفوظة</div></div>
+        <div style="color:#ccc;">›</div>
+      </div>
+      <div class="p-item">
+        <div style="font-size:20px;">⚙️</div>
+        <div style="flex:1;margin-right:10px;"><div style="font-size:15px;font-weight:800;">الإعدادات</div><div style="font-size:12px;color:#aaa;">اللغة والإشعارات</div></div>
+        <div style="color:#ccc;">›</div>
+      </div>
+      <div class="p-item" style="border:none;">
+        <div style="font-size:20px;">ℹ️</div>
+        <div style="flex:1;margin-right:10px;"><div style="font-size:15px;font-weight:800;">حول التطبيق</div><div style="font-size:12px;color:#aaa;">سوق الدواجن DZ — النسخة 1.0</div></div>
+        <div style="color:#ccc;">›</div>
+      </div>
+      <button onclick="doLogout()" style="width:100%;margin-top:16px;padding:13px;background:#fff0f0;border:1.5px solid #ffcdd2;border-radius:12px;color:#c62828;font-weight:800;cursor:pointer;font-size:15px;font-family:'Tajawal',sans-serif;">تسجيل الخروج</button>
+    `;
+  }
+}
+
+function doLogout(){
+  currentUser=null;
+  updateUserUI();
+  closeSheet('sheet-profile');
+  toast('تم تسجيل الخروج');
+}
+
+// ===== TABS =====
+const TABS=['home','search','favs'];
+function switchTab(tab){
+  TABS.forEach(t=>{
+    const pg=document.getElementById('pg-'+t);
+    if(pg) pg.className='page'+(t===tab?' on':'');
+    const lbl=document.getElementById('lbl-'+t);
+    if(lbl) lbl.className='lbl'+(t===tab?' on':'');
+  });
+  // post page
+  const pgPost=document.getElementById('pg-post');
+  if(pgPost) pgPost.className='page'+(tab==='post'?' on':'');
+  const lblPost=document.getElementById('lbl-post');
+  if(lblPost) lblPost.className='lbl'+(tab==='post'?' on':'');
+
+  const floatBtn=document.getElementById('float-btn');
+  if(floatBtn) floatBtn.style.display=(tab==='post'||tab==='auth')?'none':'flex';
+
+  if(tab==='favs') renderFavs();
+  if(tab==='search') renderSearch();
+  if(tab==='post') updateUserUI();
+}
+
+function goHome(){switchTab('home');}
+
+// ===== INIT =====
+renderCats();
+renderCards();
+updateUserUI();
+</script>
+</body>
+</html>
